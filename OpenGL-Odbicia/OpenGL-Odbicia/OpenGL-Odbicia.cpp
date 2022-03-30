@@ -65,8 +65,19 @@ bool init() {
     glfwMakeContextCurrent(okno);
     glfwSetKeyCallback(okno, key_callback);
     glfwSwapInterval(1);
-
+    glewExperimental = GL_TRUE;
     glewInit();
+
+    glEnable(GL_DEPTH_TEST);
+
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     return true;
 }
 
@@ -85,6 +96,30 @@ float tmp[] = {
         0.0f,  1.0f, 0.0f,
 };
 
+std::vector<RenderObject> renderObjects;
+
+void render() {
+    glClearColor(0.f, 0.f, 0.f, 1.f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    //Update the uniforms
+
+
+    //Render models
+    for (size_t i = 0; i < renderObjects.size(); i++)
+    {
+        renderObjects.at(i).render();
+    }
+
+    //End Draw
+    glfwSwapBuffers(okno);
+    glFlush();
+
+    glBindVertexArray(0);
+    glUseProgram(0);
+    glActiveTexture(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
 
 int main()
 {
@@ -94,42 +129,16 @@ int main()
     };
 
     
-    RenderObject testObj = RenderObject("test.obj");
     ShaderObj shader = ShaderObj("shader1.vert", "shader1.frag");
     //shader.Use();
 
+    renderObjects.push_back(RenderObject("test.obj"));
+
     while (!glfwWindowShouldClose(okno)) {
-        float ratio;
-        int width, height;
-
-        glfwGetFramebufferSize(okno, &width, &height);
-        ratio = width / (float)height;
-
-        glViewport(0, 0, width, height);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        // :: test ::
-
-        glm::mat4 Projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
-        glm::mat4 View = glm::lookAt(
-            glm::vec3(3, 3, 3), // Camera is at (4,3,3), in World Space
-            glm::vec3(0, 0, 0), // and looks at the origin
-            glm::vec3(0, 1, 0)  // Head is up (set to 0,-1,0 to look upside-down)
-        );
-        glm::mat4 Model = glm::mat4(1.0f);
-        glm::mat4 mvp = Projection * View * Model; // Our ModelViewProjection : multiplication of our 3 matrices
-        GLuint MatrixID = glGetUniformLocation(shader.ID, "MVP");
-        glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
-
-        // :: end ::
-        
-        testObj.render();
-
-
-        glfwSwapBuffers(okno);
-        glfwPollEvents();
+        render();
     }
 
     exit();
     exit(EXIT_SUCCESS);
 }
+

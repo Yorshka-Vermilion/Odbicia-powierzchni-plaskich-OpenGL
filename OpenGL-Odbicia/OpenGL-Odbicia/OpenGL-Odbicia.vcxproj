@@ -145,9 +145,11 @@
     <ClCompile Include="OpenGL-Odbicia.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="OBJ_Loader.h" />
+    <ClInclude Include="Mesh.h" />
+    <ClInclude Include="OBJLoader.h" />
     <ClInclude Include="RenderObject.h" />
     <ClInclude Include="ShaderObj.h" />
+    <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
