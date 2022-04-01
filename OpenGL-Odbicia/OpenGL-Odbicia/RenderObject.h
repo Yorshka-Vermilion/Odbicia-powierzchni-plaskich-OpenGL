@@ -3,15 +3,23 @@
 #include <GL/GL.h>
 #include <vector>
 #include <glm/glm.hpp>
+#include <stb.h>
 
 #include "OBJLoader.h"
 #include "Mesh.h"
+
 
 using namespace std;
 class RenderObject
 {
 	Mesh* mesh;
 	std::vector<Vertex> wooo;
+
+	// Textura
+	GLuint texture;
+	bool hasTexture = false;
+	int width, height, colors;
+	unsigned char* textureIMG;
 
 public:
 	RenderObject() {
@@ -28,8 +36,40 @@ public:
 			glm::vec3(1.f));
 	}
 
+	~RenderObject() {
+		if (NULL != texture) {
+			glDeleteTextures(1, &texture);
+		}
+	}
+
 	void render() {
+		if (this->hasTexture) {
+			//glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, texture);
+		}
 		this->mesh->render();
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	void SetTexture(std::string filename) {
+		this->textureIMG = stbi_load(filename.c_str(), &width, &height, &colors, 0);
+		glGenTextures(1, &texture);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, textureIMG);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		
+		stbi_image_free(textureIMG);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		this->hasTexture = true;
 	}
 
 	void init() {

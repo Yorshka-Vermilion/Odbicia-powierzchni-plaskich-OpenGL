@@ -194,4 +194,11 @@ public:
 		glActiveTexture(0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
+
+	void bind() {
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	}
+	void unbind() {
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
 };

@@ -81,7 +81,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>S:\Biblioteki\glm;S:\Biblioteki\glew-2.1.0\include;S:\Biblioteki\glfw\glfw-3.3.6\include;$(IncludePath)</IncludePath>
+    <IncludePath>S:\Polibuda\S7\AGK-Projekt\OpenGL-Odbicia\OpenGL-Odbicia\include;S:\Biblioteki\glm;S:\Biblioteki\glew-2.1.0\include;S:\Biblioteki\glfw\glfw-3.3.6\include;$(IncludePath)</IncludePath>
     <LibraryPath>s:\Biblioteki\glew-2.1.0\lib;s:\Biblioteki\glfw\src\Release;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -143,6 +143,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="OpenGL-Odbicia.cpp" />
+    <ClCompile Include="stb.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />

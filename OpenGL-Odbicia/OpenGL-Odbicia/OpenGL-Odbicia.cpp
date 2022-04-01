@@ -194,10 +194,12 @@ int main()
     ShaderObj shader = ShaderObj("shader1.vert", "shader1.frag");
     shader.Use();
 
+
+
     camera = Camera(rozmiarOkna, shader, "cameraMatrix");
 
     renderObjects.push_back(RenderObject("test.obj"));
-
+    renderObjects.at(0).SetTexture("Tekstury/Skala.jpg");
 
     
 

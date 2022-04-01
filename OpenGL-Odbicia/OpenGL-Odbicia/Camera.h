@@ -51,7 +51,7 @@ public:
 		glm::mat4 projection = glm::mat4(1.0f);
 
 		view = glm::lookAt(position, position + orientation, up);
-		projection = glm::perspective(glm::radians(45.0f), windowSize.x / windowSize.y, 1.f, 100.0f);
+		projection = glm::perspective(glm::radians(45.0f), windowSize.x / windowSize.y, 0.01f, 100.0f);
 	
 		glUniformMatrix4fv(glGetUniformLocation(mainShader.ID, uniformLocation), 1, GL_FALSE, glm::value_ptr(projection * view));
 	}
