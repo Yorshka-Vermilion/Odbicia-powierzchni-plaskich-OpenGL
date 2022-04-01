@@ -13,7 +13,9 @@ class ShaderObj
 public:
 	GLuint ID;
 
+	ShaderObj() {
 
+	}
 	ShaderObj(std::string vertexPath, std::string fragPath) {
 		LoadShaders2(vertexPath, fragPath);
 	}

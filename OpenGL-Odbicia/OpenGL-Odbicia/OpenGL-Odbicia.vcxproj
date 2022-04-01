@@ -145,6 +145,7 @@
     <ClCompile Include="OpenGL-Odbicia.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="OBJLoader.h" />
     <ClInclude Include="RenderObject.h" />

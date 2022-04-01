@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #pragma comment(lib, "glew32.lib")
 #pragma comment(lib, "glfw3.lib")
@@ -13,6 +14,7 @@
 
 #include "RenderObject.h"
 #include "ShaderObj.h"
+#include "Camera.h"
 
 using namespace std;
 
@@ -27,13 +29,60 @@ GLuint vertex_buffer, vertex_shader, fragment_shader, program;
 GLint mvp_location, vpos_location, vcol_location;
 
 
+float rotation = 0.5f;
+
+float currTime, lastTime, dt;
+
+Camera camera;
+bool cameraRotActive;
+
 // :: Obsluga klawiszy ::
 
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
+void rotateCamera() {
+    glm::dvec2 mousePos;
+    glfwGetCursorPos(okno, &mousePos.x, &mousePos.y);
+    glm::vec2 mouseRot = glm::vec2(mousePos.y - (rozmiarOkna.y / 2), mousePos.x - (rozmiarOkna.x / 2));
+
+
+    camera.Rotate(mouseRot, dt);
+    glfwSetCursorPos(okno, (rozmiarOkna.x / 2), (rozmiarOkna.y / 2));
 }
+
+void updateKeyboard() {
+    if (glfwGetKey(okno,GLFW_KEY_ESCAPE)== GLFW_PRESS)
+        glfwSetWindowShouldClose(okno, GLFW_TRUE);
+
+    if (glfwGetKey(okno, GLFW_KEY_W) == GLFW_PRESS)
+        camera.Move(FORWARD, dt);
+    if (glfwGetKey(okno, GLFW_KEY_S) == GLFW_PRESS)
+        camera.Move(BACK, dt);
+    if (glfwGetKey(okno, GLFW_KEY_A) == GLFW_PRESS)
+        camera.Move(LEFT, dt);
+    if (glfwGetKey(okno, GLFW_KEY_D) == GLFW_PRESS)
+        camera.Move(RIGHT, dt);
+    if (glfwGetKey(okno, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+        camera.Move(UP, dt);
+    if (glfwGetKey(okno, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+        camera.Move(DOWN, dt);
+}
+
+static void mouse_callback(GLFWwindow* window, int button, int action, int mods)
+{
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+
+        if (!cameraRotActive) {
+            glfwSetCursorPos(window, (rozmiarOkna.x / 2), (rozmiarOkna.y / 2));
+            cameraRotActive = true;
+        }
+        
+    }
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE) {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        cameraRotActive = false;
+    }
+}
+
 
 // :: Obsługa błedów ::
 
@@ -63,7 +112,7 @@ bool init() {
     }
 
     glfwMakeContextCurrent(okno);
-    glfwSetKeyCallback(okno, key_callback);
+    glfwSetMouseButtonCallback(okno, mouse_callback);
     glfwSwapInterval(1);
     glewExperimental = GL_TRUE;
     glewInit();
@@ -86,8 +135,6 @@ void exit() {
     glfwTerminate();
 }
 
-
-
 // :: RENDER ::
 
 float tmp[] = {
@@ -101,7 +148,7 @@ std::vector<RenderObject> renderObjects;
 void render() {
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
+    
     //Update the uniforms
 
 
@@ -121,6 +168,21 @@ void render() {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void update() {
+    glfwPollEvents();
+    updateKeyboard();
+
+    currTime = static_cast<float>(glfwGetTime());
+    dt = currTime - lastTime;
+    lastTime = currTime;
+    
+    camera.UpdateMatrix();
+    if (cameraRotActive) {
+        rotateCamera();
+    }
+}
+
+
 int main()
 {
     if (!init()) {
@@ -130,12 +192,23 @@ int main()
 
     
     ShaderObj shader = ShaderObj("shader1.vert", "shader1.frag");
-    //shader.Use();
+    shader.Use();
+
+    camera = Camera(rozmiarOkna, shader, "cameraMatrix");
 
     renderObjects.push_back(RenderObject("test.obj"));
 
+
+    
+
+
     while (!glfwWindowShouldClose(okno)) {
+        
+        update();
+        
+        
         render();
+        
     }
 
     exit();
