@@ -143,9 +143,9 @@ float tmp[] = {
         0.0f,  1.0f, 0.0f,
 };
 
-std::vector<RenderObject> renderObjects;
+std::vector<RenderObject*> renderObjects;
 
-void render() {
+void render(ShaderObj *shader) {
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     
@@ -155,7 +155,7 @@ void render() {
     //Render models
     for (size_t i = 0; i < renderObjects.size(); i++)
     {
-        renderObjects.at(i).render();
+        renderObjects.at(i)->render(shader);
     }
 
     //End Draw
@@ -168,7 +168,7 @@ void render() {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void update() {
+void update(ShaderObj* shader) {
     glfwPollEvents();
     updateKeyboard();
 
@@ -176,7 +176,7 @@ void update() {
     dt = currTime - lastTime;
     lastTime = currTime;
     
-    camera.UpdateMatrix();
+    camera.UpdateMatrix(shader);
     if (cameraRotActive) {
         rotateCamera();
     }
@@ -192,24 +192,25 @@ int main()
 
     
     ShaderObj shader = ShaderObj("shader1.vert", "shader1.frag");
-    shader.Use();
+    //shader.Use();
 
 
 
-    camera = Camera(rozmiarOkna, shader, "cameraMatrix");
+    camera = Camera(rozmiarOkna, "cameraMatrix");
 
-    renderObjects.push_back(RenderObject("test.obj"));
-    renderObjects.at(0).SetTexture("Tekstury/Skala.jpg");
+    renderObjects.push_back(new RenderObject("Obiekty/test.obj", glm::vec3(1.f, 1.f, 1.f)));
+    renderObjects.at(0)->SetTexture("Tekstury/Skala.jpg");
 
-    
+    renderObjects.push_back(new RenderObject("Obiekty/Floor_square.obj", glm::vec3(0.f, 0.f, 0.f)));
+    renderObjects.at(1)->SetTexture("Tekstury/Patrick.jpg");
 
 
     while (!glfwWindowShouldClose(okno)) {
         
-        update();
+        update(&shader);
         
         
-        render();
+        render(&shader);
         
     }
 

@@ -27,15 +27,7 @@ public:
 		}
 	}
 
-	void Use() {
-		glUseProgram(ID);
-	}
-
-	void Stop() {
-		glUseProgram(0);
-	}
-
-
+	
 private:
 	GLuint LoadShaders(const char* vertex_file_path, const char* fragment_file_path) {
 
@@ -125,5 +117,32 @@ private:
 
 		return ProgramID;
 	}
+	public:
+		void Use() {
+			glUseProgram(ID);
+		}
+
+		void Stop() {
+			glUseProgram(0);
+		}
+
+		void set1i(GLint value, const GLchar* name)
+		{
+			this->Use();
+
+			glUniform1i(glGetUniformLocation(this->ID, name), value);
+
+			this->Stop();
+		}
+
+		void setMat4fv(glm::mat4 value, const GLchar* name, GLboolean transpose = GL_FALSE)
+		{
+			this->Use();
+
+			glUniformMatrix4fv(glGetUniformLocation(this->ID, name), 1, transpose, glm::value_ptr(value));
+
+			this->Stop();
+		}
+
 };
 

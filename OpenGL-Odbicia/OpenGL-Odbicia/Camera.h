@@ -27,7 +27,6 @@ public:
 	float speed = 1.f;
 	float sensitivity = 15.f;
 	
-	ShaderObj mainShader;
 	const char* uniformLocation;
 
 	float pitch, yaw;
@@ -36,16 +35,15 @@ public:
 	
 	}
 
-	Camera(glm::vec2 WindowSize, ShaderObj& shader, const char* uniform) {
+	Camera(glm::vec2 WindowSize, const char* uniform) {
 		this->windowSize = WindowSize;
 		this->position = glm::vec3(0.0f, 0.0f, 2.f);
-		this->mainShader = shader;
 		this->uniformLocation = uniform;
 	}
 
-	void UpdateMatrix() {
+	void UpdateMatrix(ShaderObj* shader) {
 
-		mainShader.Use();
+		shader->Use();
 
 		glm::mat4 view = glm::mat4(1.0f);
 		glm::mat4 projection = glm::mat4(1.0f);
@@ -53,7 +51,8 @@ public:
 		view = glm::lookAt(position, position + orientation, up);
 		projection = glm::perspective(glm::radians(45.0f), windowSize.x / windowSize.y, 0.01f, 100.0f);
 	
-		glUniformMatrix4fv(glGetUniformLocation(mainShader.ID, uniformLocation), 1, GL_FALSE, glm::value_ptr(projection * view));
+		glUniformMatrix4fv(glGetUniformLocation(shader->ID, uniformLocation), 1, GL_FALSE, glm::value_ptr(projection * view));
+		shader->Stop();
 	}
 
 	void Move(const int direction, const float& dt) {

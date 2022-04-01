@@ -6,6 +6,7 @@
 #include <stb.h>
 
 #include "OBJLoader.h"
+#include "ShaderObj.h"
 #include "Mesh.h"
 
 
@@ -26,14 +27,15 @@ public:
 
 	};
 
-	RenderObject(std::string filename) {
+	RenderObject(std::string filename, glm::vec3 position) {
 		//load_obj(filename.c_str());
 		//bool loadout = loader.LoadFile(filename);
 		std::vector<Vertex> mesh = loadOBJ(filename.c_str());
-		this->mesh = new Mesh(mesh.data(), mesh.size(), NULL, 0, glm::vec3(1.f, 0.f, 0.f),
+		this->mesh = new Mesh(mesh.data(), mesh.size(), NULL, 0, position,
 			glm::vec3(0.f),
 			glm::vec3(0.f),
 			glm::vec3(1.f));
+
 	}
 
 	~RenderObject() {
@@ -42,18 +44,23 @@ public:
 		}
 	}
 
-	void render() {
+	void render(ShaderObj* shader) {
 		if (this->hasTexture) {
-			//glActiveTexture(GL_TEXTURE0);
+			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, texture);
+			//shader->set1i(texture, "tex0");
+			shader->Use();
+
+			
 		}
-		this->mesh->render();
+		this->mesh->render(shader);
 		glBindTexture(GL_TEXTURE_2D, 0);
+		shader->Stop();
 	}
 
 	void SetTexture(std::string filename) {
 		this->textureIMG = stbi_load(filename.c_str(), &width, &height, &colors, 0);
-		glGenTextures(1, &texture);
+		glGenTextures(1, &this->texture);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture);
@@ -68,7 +75,7 @@ public:
 		
 		stbi_image_free(textureIMG);
 		glBindTexture(GL_TEXTURE_2D, 0);
-
+		glActiveTexture(0);
 		this->hasTexture = true;
 	}
 

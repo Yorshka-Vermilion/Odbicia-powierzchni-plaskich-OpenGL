@@ -175,12 +175,13 @@ public:
 
 	}
 
-	void render()
+	void render(ShaderObj* shader)
 	{
 		//Update uniforms
 		this->updateModelMatrix();
-
+		shader->setMat4fv(this->ModelMatrix, "ModelMatrix");
 		//Bind VAO
+		shader->Use();
 		glBindVertexArray(this->VAO);
 
 		//RENDER
