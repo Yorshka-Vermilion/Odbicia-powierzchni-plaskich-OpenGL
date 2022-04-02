@@ -15,6 +15,7 @@
 #include "RenderObject.h"
 #include "ShaderObj.h"
 #include "Camera.h"
+#include "Cubemap.h"
 
 using namespace std;
 
@@ -35,6 +36,8 @@ float currTime, lastTime, dt;
 
 Camera camera;
 bool cameraRotActive;
+
+Cubemap mainCubemap;
 
 // :: Obsluga klawiszy ::
 
@@ -145,19 +148,19 @@ float tmp[] = {
 
 std::vector<RenderObject*> renderObjects;
 
-void render(ShaderObj *shader) {
+void render(ShaderObj *shader, ShaderObj *cubemapShader) {
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     
     //Update the uniforms
-
-
+    
     //Render models
     for (size_t i = 0; i < renderObjects.size(); i++)
     {
         renderObjects.at(i)->render(shader);
     }
-
+    
+    mainCubemap.render(camera,rozmiarOkna,cubemapShader);
     //End Draw
     glfwSwapBuffers(okno);
     glFlush();
@@ -192,9 +195,10 @@ int main()
 
     
     ShaderObj shader = ShaderObj("shader1.vert", "shader1.frag");
+    ShaderObj cubemapShader = ShaderObj("cubemaps.vert", "cubemaps.frag");
     //shader.Use();
 
-
+    mainCubemap = Cubemap(&cubemapShader);
 
     camera = Camera(rozmiarOkna, "cameraMatrix");
 
@@ -210,7 +214,7 @@ int main()
         update(&shader);
         
         
-        render(&shader);
+        render(&shader,&cubemapShader);
         
     }
 

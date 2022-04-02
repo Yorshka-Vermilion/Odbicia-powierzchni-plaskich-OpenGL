@@ -23,6 +23,8 @@ public:
 	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 
 	glm::vec2 windowSize;
+	glm::mat4 view;
+	glm::mat4 projection;
 
 	float speed = 1.f;
 	float sensitivity = 15.f;
@@ -45,8 +47,8 @@ public:
 
 		shader->Use();
 
-		glm::mat4 view = glm::mat4(1.0f);
-		glm::mat4 projection = glm::mat4(1.0f);
+		view = glm::mat4(1.0f);
+		projection = glm::mat4(1.0f);
 
 		view = glm::lookAt(position, position + orientation, up);
 		projection = glm::perspective(glm::radians(45.0f), windowSize.x / windowSize.y, 0.01f, 100.0f);

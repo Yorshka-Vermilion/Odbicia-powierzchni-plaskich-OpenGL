@@ -21,6 +21,7 @@ class RenderObject
 	bool hasTexture = false;
 	int width, height, colors;
 	unsigned char* textureIMG;
+	string defaultTextureFile = "Tekstury/skala.jpg";
 
 public:
 	RenderObject() {
@@ -45,14 +46,15 @@ public:
 	}
 
 	void render(ShaderObj* shader) {
-		if (this->hasTexture) {
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, texture);
-			//shader->set1i(texture, "tex0");
-			shader->Use();
-
-			
+		shader->Use();
+		if (!this->hasTexture) {
+			SetTexture(defaultTextureFile);
 		}
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		//shader->set1i(texture, "tex0");
+		
 		this->mesh->render(shader);
 		glBindTexture(GL_TEXTURE_2D, 0);
 		shader->Stop();

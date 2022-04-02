@@ -135,6 +135,15 @@ private:
 			this->Stop();
 		}
 
+		void set3f(float x, float y, float z, const GLchar* name)
+		{
+			this->Use();
+
+			glUniform3f(glGetUniformLocation(this->ID, name), x,y,z);
+
+			this->Stop();
+		}
+
 		void setMat4fv(glm::mat4 value, const GLchar* name, GLboolean transpose = GL_FALSE)
 		{
 			this->Use();
