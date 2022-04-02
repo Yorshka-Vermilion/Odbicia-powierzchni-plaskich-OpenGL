@@ -31,21 +31,22 @@ class RenderObject
 	int heightFB = 1024;
 
 public:
-	glm::vec3 position;
+	glm::vec3 position, rotation;
 	bool reflective = false;
 
 	RenderObject() {
 
 	};
 
-	RenderObject(std::string filename, glm::vec3 position) {
+	RenderObject(std::string filename, glm::vec3 position, glm::vec3 rotation = glm::vec3(0.f)) {
 		//load_obj(filename.c_str());
 		//bool loadout = loader.LoadFile(filename);
 		this->position = position;
+		this->rotation = rotation;
 		std::vector<Vertex> mesh = loadOBJ(filename.c_str());
 		this->mesh = new Mesh(mesh.data(), mesh.size(), NULL, 0, position,
 			glm::vec3(0.f),
-			glm::vec3(0.f, 0.f,0.f),
+			rotation,
 			glm::vec3(1.f));
 
 	}

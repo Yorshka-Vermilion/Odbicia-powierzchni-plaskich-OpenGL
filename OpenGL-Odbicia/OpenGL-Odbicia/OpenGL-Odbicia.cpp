@@ -40,6 +40,9 @@ bool cameraRotActive;
 
 Cubemap mainCubemap;
 
+std::vector<RenderObject*> renderObjects;
+std::vector<RenderObject*> reflectiveRenderObjects;
+
 // :: Obsluga klawiszy ::
 
 void rotateCamera() {
@@ -147,43 +150,41 @@ float tmp[] = {
         0.0f,  1.0f, 0.0f,
 };
 
-std::vector<RenderObject*> renderObjects;
+
 
 void render(ShaderObj *shader, ShaderObj *cubemapShader, ShaderObj *reflectionShader) {
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     
-    //Update the uniforms
-    
-    //Render models
-    
-    float distance = 2 * (camera.position.y - renderObjects.at(2)->position.y);
-    camera.flip(distance);
-    camera.UpdateMatrix(shader);
-    mainCubemap.updateMatrix(camera);
-    renderObjects.at(2)->bindReflections();
-    for (size_t i = 0; i < renderObjects.size(); i++)
-    {
-        if(!renderObjects.at(i)->reflective)
-            renderObjects.at(i)->render(shader);
-    }
+    // Render odbić
+    for (size_t j = 0; j < reflectiveRenderObjects.size(); j++) {
+        float distance = 2 * (camera.position.y - renderObjects.at(2)->position.y);
+        camera.flip(distance);
+        camera.UpdateMatrix(shader);
+        mainCubemap.updateMatrix(camera);
+        reflectiveRenderObjects.at(j)->bindReflections();
+        for (size_t i = 0; i < renderObjects.size(); i++)
+        {
+            if (!renderObjects.at(i)->reflective)
+                renderObjects.at(i)->render(shader);
+        }
 
-    mainCubemap.render(cubemapShader);
-    renderObjects.at(2)->unbindReflections(rozmiarOkna);
-    camera.flip(-distance);
-    camera.UpdateMatrix(shader);
-    mainCubemap.updateMatrix(camera);
+        mainCubemap.render(cubemapShader);
+        reflectiveRenderObjects.at(j)->unbindReflections(rozmiarOkna);
+        camera.flip(-distance);
+        camera.UpdateMatrix(shader);
+        mainCubemap.updateMatrix(camera);
+    }
+    // Render głowny
     for (size_t i = 0; i < renderObjects.size(); i++)
     {
         if (!renderObjects.at(i)->reflective)
             renderObjects.at(i)->render(shader);
         else renderObjects.at(i)->render(reflectionShader,&camera);
     }
-
     mainCubemap.render(cubemapShader);
 
-    
-    //End Draw
+    // Koniec renderu
     glfwSwapBuffers(okno);
     glFlush();
 
@@ -210,6 +211,14 @@ void update(ShaderObj* shader) {
 
 }
 
+void addRenderObject(RenderObject* object, string filename, bool reflective = false) {
+    renderObjects.push_back(object);
+    object->SetTexture(filename);
+    if (reflective) {
+        reflectiveRenderObjects.push_back(object);
+        object->initReflections();
+    }
+};
 
 int main()
 {
@@ -228,15 +237,13 @@ int main()
 
     camera = Camera(rozmiarOkna, "cameraMatrix");
 
-    renderObjects.push_back(new RenderObject("Obiekty/test.obj", glm::vec3(0.f, 0.f, 0.f)));
-    renderObjects.at(0)->SetTexture("Tekstury/Skala.jpg");
+    addRenderObject(new RenderObject("Obiekty/test.obj", glm::vec3(2.f, 0.f, 0.f)), "Tekstury/Skala.jpg");
 
-    renderObjects.push_back(new RenderObject("Obiekty/Floor_square.obj", glm::vec3(0.f, 2.f, 0.f)));
-    renderObjects.at(1)->SetTexture("Tekstury/Patrick.jpg");
+    addRenderObject(new RenderObject("Obiekty/Floor_square.obj", glm::vec3(0.f, 2.f, 0.f)), "Tekstury/Patrick.jpg");
 
-    renderObjects.push_back(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -0.5f, 0.f)));
-    renderObjects.at(2)->SetTexture("Tekstury/Gradient.jpg");
-    renderObjects.at(2)->initReflections();
+    addRenderObject(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -0.5f, 0.f), glm::vec3(0.f,0.f,0.f)), "Tekstury/Gradient.jpg", true);
+
+
 
     while (!glfwWindowShouldClose(okno)) {
         

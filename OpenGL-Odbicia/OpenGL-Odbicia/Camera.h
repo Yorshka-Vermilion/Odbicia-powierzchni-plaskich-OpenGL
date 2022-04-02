@@ -57,7 +57,8 @@ public:
 		
 		this->position.y -= distance;
 		orientation = glm::rotate(orientation, (float)glm::radians(180.f), glm::normalize(glm::cross(orientation, up)));
-		orientation = glm::rotate(orientation, (float)glm::radians(180.f),  up);
+		orientation = glm::rotate(orientation, (float)glm::radians(180.f), up);
+		
 	}
 
 	void Move(const int direction, const float& dt) {
