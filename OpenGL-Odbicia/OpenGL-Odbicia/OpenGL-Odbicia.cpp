@@ -7,6 +7,7 @@
 #include <glm/ext.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/rotate_vector.hpp>
 
 #pragma comment(lib, "glew32.lib")
 #pragma comment(lib, "glfw3.lib")
@@ -148,19 +149,40 @@ float tmp[] = {
 
 std::vector<RenderObject*> renderObjects;
 
-void render(ShaderObj *shader, ShaderObj *cubemapShader) {
+void render(ShaderObj *shader, ShaderObj *cubemapShader, ShaderObj *reflectionShader) {
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     
     //Update the uniforms
     
     //Render models
+    
+    float distance = 2 * (camera.position.y - renderObjects.at(2)->position.y);
+    camera.flip(distance);
+    camera.UpdateMatrix(shader);
+    mainCubemap.updateMatrix(camera);
+    renderObjects.at(2)->bindReflections();
     for (size_t i = 0; i < renderObjects.size(); i++)
     {
-        renderObjects.at(i)->render(shader);
+        if(!renderObjects.at(i)->reflective)
+            renderObjects.at(i)->render(shader);
     }
+
+    mainCubemap.render(cubemapShader);
+    renderObjects.at(2)->unbindReflections(rozmiarOkna);
+    camera.flip(-distance);
+    camera.UpdateMatrix(shader);
+    mainCubemap.updateMatrix(camera);
+    for (size_t i = 0; i < renderObjects.size(); i++)
+    {
+        if (!renderObjects.at(i)->reflective)
+            renderObjects.at(i)->render(shader);
+        else renderObjects.at(i)->render(reflectionShader,&camera);
+    }
+
+    mainCubemap.render(cubemapShader);
+
     
-    mainCubemap.render(camera,rozmiarOkna,cubemapShader);
     //End Draw
     glfwSwapBuffers(okno);
     glFlush();
@@ -183,6 +205,9 @@ void update(ShaderObj* shader) {
     if (cameraRotActive) {
         rotateCamera();
     }
+
+    mainCubemap.updateMatrix(camera);
+
 }
 
 
@@ -196,25 +221,29 @@ int main()
     
     ShaderObj shader = ShaderObj("shader1.vert", "shader1.frag");
     ShaderObj cubemapShader = ShaderObj("cubemaps.vert", "cubemaps.frag");
+    ShaderObj reflectionShader = ShaderObj("odbicie.vert", "odbicie.frag");
     //shader.Use();
 
     mainCubemap = Cubemap(&cubemapShader);
 
     camera = Camera(rozmiarOkna, "cameraMatrix");
 
-    renderObjects.push_back(new RenderObject("Obiekty/test.obj", glm::vec3(1.f, 1.f, 1.f)));
+    renderObjects.push_back(new RenderObject("Obiekty/test.obj", glm::vec3(0.f, 0.f, 0.f)));
     renderObjects.at(0)->SetTexture("Tekstury/Skala.jpg");
 
-    renderObjects.push_back(new RenderObject("Obiekty/Floor_square.obj", glm::vec3(0.f, 0.f, 0.f)));
+    renderObjects.push_back(new RenderObject("Obiekty/Floor_square.obj", glm::vec3(0.f, 2.f, 0.f)));
     renderObjects.at(1)->SetTexture("Tekstury/Patrick.jpg");
 
+    renderObjects.push_back(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -0.5f, 0.f)));
+    renderObjects.at(2)->SetTexture("Tekstury/Gradient.jpg");
+    renderObjects.at(2)->initReflections();
 
     while (!glfwWindowShouldClose(okno)) {
         
         update(&shader);
         
         
-        render(&shader,&cubemapShader);
+        render(&shader,&cubemapShader,&reflectionShader);
         
     }
 

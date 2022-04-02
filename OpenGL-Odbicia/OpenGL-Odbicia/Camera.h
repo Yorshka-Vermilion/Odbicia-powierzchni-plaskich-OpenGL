@@ -26,12 +26,11 @@ public:
 	glm::mat4 view;
 	glm::mat4 projection;
 
-	float speed = 1.f;
+	float speed = 5.f;
 	float sensitivity = 15.f;
 	
 	const char* uniformLocation;
 
-	float pitch, yaw;
 
 	Camera() {
 	
@@ -47,14 +46,18 @@ public:
 
 		shader->Use();
 
-		view = glm::mat4(1.0f);
-		projection = glm::mat4(1.0f);
-
 		view = glm::lookAt(position, position + orientation, up);
 		projection = glm::perspective(glm::radians(45.0f), windowSize.x / windowSize.y, 0.01f, 100.0f);
 	
 		glUniformMatrix4fv(glGetUniformLocation(shader->ID, uniformLocation), 1, GL_FALSE, glm::value_ptr(projection * view));
 		shader->Stop();
+	}
+
+	void flip(float distance) {
+		
+		this->position.y -= distance;
+		orientation = glm::rotate(orientation, (float)glm::radians(180.f), glm::normalize(glm::cross(orientation, up)));
+		orientation = glm::rotate(orientation, (float)glm::radians(180.f),  up);
 	}
 
 	void Move(const int direction, const float& dt) {

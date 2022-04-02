@@ -54,6 +54,7 @@ class Cubemap
 		"Cubemaps/posz.jpg"
 	};
 	unsigned int VAO, VBO, EBO;
+	glm::mat4 view,proj;
 
 public:
 	Cubemap() {
@@ -101,19 +102,16 @@ public:
 		shader->set1i(0, "cubemap");
 	}
 
-	void render(Camera camera, glm::vec2 rozmiarOkna, ShaderObj* shader) {
+	void updateMatrix(Camera camera) {
+		this->proj = camera.projection;
+		this->view = glm::mat4(glm::mat3(camera.view[0], camera.view[1], camera.view[2]));
+	}
+
+	void render(ShaderObj* shader) {
 		glDepthFunc(GL_LEQUAL);
 		shader->Use();
-		/*
-		glm::mat4 view = camera.view;
-		glm::mat4 proj = camera.projection;
-		*/
-		glm::mat4 view = glm::mat4(1.0f);
-		glm::mat4 proj = glm::mat4(1.0f);
-		view = glm::mat4(glm::mat3(glm::lookAt(camera.position, camera.position + camera.orientation, camera.up)));
-		proj = glm::perspective(glm::radians(45.0f), (float)rozmiarOkna.x / rozmiarOkna.y, 0.1f, 100.f);
-
-
+		
+		
 		shader->setMat4fv(view, "view");
 		shader->setMat4fv(proj, "projection");
 		shader->Use();
