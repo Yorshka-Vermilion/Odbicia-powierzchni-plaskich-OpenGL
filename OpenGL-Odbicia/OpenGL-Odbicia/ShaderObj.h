@@ -144,6 +144,15 @@ private:
 			this->Stop();
 		}
 
+		void set3fv(glm::fvec3 value, const GLchar* name)
+		{
+			this->Use();
+
+			glUniform3fv(glGetUniformLocation(this->ID, name), 1, glm::value_ptr(value));
+
+			this->Stop();
+		}
+
 		void setMat4fv(glm::mat4 value, const GLchar* name, GLboolean transpose = GL_FALSE)
 		{
 			this->Use();

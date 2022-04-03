@@ -26,7 +26,7 @@ public:
 	glm::mat4 view;
 	glm::mat4 projection;
 
-	float speed = 5.f;
+	float speed = 1.f;
 	float sensitivity = 15.f;
 	
 	const char* uniformLocation;
@@ -54,10 +54,12 @@ public:
 	}
 
 	void flip(float distance) {
-		
 		this->position.y -= distance;
 		orientation = glm::rotate(orientation, (float)glm::radians(180.f), glm::normalize(glm::cross(orientation, up)));
 		orientation = glm::rotate(orientation, (float)glm::radians(180.f), up);
+	}
+
+	void flipByPoint(glm::vec3 position) {
 		
 	}
 

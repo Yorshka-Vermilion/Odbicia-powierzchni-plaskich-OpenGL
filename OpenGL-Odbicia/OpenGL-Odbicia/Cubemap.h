@@ -14,6 +14,7 @@
 
 class Cubemap
 {
+public:
 	GLuint texture;
 	float verts[24] = {
 		-1.0f, -1.0f,  1.0f,

@@ -1,11 +1,12 @@
 #version 440
 out vec4 color;
 
+in vec2 texCoord;
+uniform sampler2D tex0;
+uniform samplerCube cubemap;
 
-in vec4 clipSpace;
-uniform sampler2D reflectionTexture;
+in vec3 reflectedVector;
 
 void main(){
-  vec2 ndc = (clipSpace.xy/clipSpace.w)/2 +0.5;
-  color = texture(reflectionTexture, vec2(ndc.x, -ndc.y));
+  color = texture(cubemap, vec3(reflectedVector.x, reflectedVector.y,-reflectedVector.z));
 }

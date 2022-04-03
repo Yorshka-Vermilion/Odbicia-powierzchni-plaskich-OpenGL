@@ -11,6 +11,7 @@ out vec3 vs_position;
 uniform mat4 cameraMatrix;
 uniform mat4 ModelMatrix;
 
+uniform vec3 cameraPosition;
 void main(){
   // Output position of the vertex, in clip space : MVP * position
 

@@ -158,29 +158,43 @@ void render(ShaderObj *shader, ShaderObj *cubemapShader, ShaderObj *reflectionSh
     
     // Render odbić
     for (size_t j = 0; j < reflectiveRenderObjects.size(); j++) {
-        float distance = 2 * (camera.position.y - renderObjects.at(2)->position.y);
-        camera.flip(distance);
-        camera.UpdateMatrix(shader);
-        mainCubemap.updateMatrix(camera);
+        //float distance = 2 * (camera.position.y - renderObjects.at(2)->position.y);
+        
+
+        //camera.flip(distance);
+        //camera.UpdateMatrix(shader);
+        //mainCubemap.updateMatrix(camera);
         reflectiveRenderObjects.at(j)->bindReflections();
-        for (size_t i = 0; i < renderObjects.size(); i++)
+        for (size_t i = 0; i < 0; i++)
         {
-            if (!renderObjects.at(i)->reflective)
+            if (!renderObjects.at(i)->reflective) {
+                /*
+                glm::mat4 oldMV = renderObjects.at(i)->mesh->ModelMatrix;
+                glm::mat4 MV = oldMV;
+                glm::vec3 V = glm::vec3(-MV[2][0], -MV[2][1], -MV[2][2]);
+                glm::vec3 R = glm::reflect(V, glm::vec3(0.f, 1.f, 0.f));
+                MV = glm::lookAt(renderObjects.at(i)->mesh->position, renderObjects.at(i)->mesh->position + R, glm::vec3(0.f, 1.f, 0.f));
+                MV = glm::scale(MV, glm::vec3(-1, 1, 1));
+                renderObjects.at(i)->mesh->ModelMatrix = MV;
                 renderObjects.at(i)->render(shader);
+                renderObjects.at(i)->mesh->ModelMatrix = oldMV;
+                */
+                renderObjects.at(i)->render(shader);
+            }
         }
 
-        mainCubemap.render(cubemapShader);
+        //mainCubemap.render(cubemapShader);
         reflectiveRenderObjects.at(j)->unbindReflections(rozmiarOkna);
-        camera.flip(-distance);
+        //camera.flip(-distance);
         camera.UpdateMatrix(shader);
-        mainCubemap.updateMatrix(camera);
+        //mainCubemap.updateMatrix(camera);
     }
     // Render głowny
     for (size_t i = 0; i < renderObjects.size(); i++)
     {
         if (!renderObjects.at(i)->reflective)
             renderObjects.at(i)->render(shader);
-        else renderObjects.at(i)->render(reflectionShader,&camera);
+        else renderObjects.at(i)->render(reflectionShader,&camera,&mainCubemap);
     }
     mainCubemap.render(cubemapShader);
 
@@ -237,12 +251,16 @@ int main()
 
     camera = Camera(rozmiarOkna, "cameraMatrix");
 
-    addRenderObject(new RenderObject("Obiekty/test.obj", glm::vec3(2.f, 0.f, 0.f)), "Tekstury/Skala.jpg");
+    addRenderObject(new RenderObject("Obiekty/test.obj", glm::vec3(0.f, 0.f, 0.f)), "Tekstury/Skala.jpg",true);
 
     addRenderObject(new RenderObject("Obiekty/Floor_square.obj", glm::vec3(0.f, 2.f, 0.f)), "Tekstury/Patrick.jpg");
 
-    addRenderObject(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -0.5f, 0.f), glm::vec3(0.f,0.f,0.f)), "Tekstury/Gradient.jpg", true);
+    addRenderObject(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -2.f, 0.f), glm::vec3(0.f,0.f,0.f)), "Tekstury/Gradient.jpg", true);
 
+   // addRenderObject(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -5.f, 0.f), glm::vec3(90.f, 0.f, 0.f)), "Tekstury/Gradient.jpg", true);
+   // addRenderObject(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -5.f, 0.f), glm::vec3(-90.f, 0.f, 0.f)), "Tekstury/Gradient.jpg", true);
+   // addRenderObject(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -5.f, 0.f), glm::vec3(0.f, 0.f, 90.f)), "Tekstury/Gradient.jpg", true);
+    //addRenderObject(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -5.f, 0.f), glm::vec3(0.f, 0.f, -90.f)), "Tekstury/Gradient.jpg", true);
 
 
     while (!glfwWindowShouldClose(okno)) {
