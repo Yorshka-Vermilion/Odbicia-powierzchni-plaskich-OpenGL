@@ -33,14 +33,16 @@ class RenderObject
 public:
 	glm::vec3 position, rotation;
 	bool reflective = false;
+	bool horizontal = false;
 
 	RenderObject() {
 
 	};
 
-	RenderObject(std::string filename, glm::vec3 position, glm::vec3 rotation = glm::vec3(0.f)) {
+	RenderObject(std::string filename, glm::vec3 position, bool horizontal = false, glm::vec3 rotation = glm::vec3(0.f)) {
 		//load_obj(filename.c_str());
 		//bool loadout = loader.LoadFile(filename);
+		this->horizontal = horizontal;
 		this->position = position;
 		this->rotation = rotation;
 		std::vector<Vertex> mesh = loadOBJ(filename.c_str());

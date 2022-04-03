@@ -158,8 +158,8 @@ void render(ShaderObj *shader, ShaderObj *cubemapShader, ShaderObj *reflectionSh
     
     // Render odbić
     for (size_t j = 0; j < reflectiveRenderObjects.size(); j++) {
-        float distance = 2 * (camera.position.y - renderObjects.at(2)->position.y);
-        camera.flip(distance);
+        glm::vec3 distance = (camera.position - reflectiveRenderObjects.at(j)->position) * 2.f;
+        camera.flip(distance, reflectiveRenderObjects.at(j)->horizontal);
         camera.UpdateMatrix(shader);
         mainCubemap.updateMatrix(camera);
         reflectiveRenderObjects.at(j)->bindReflections();
@@ -171,7 +171,7 @@ void render(ShaderObj *shader, ShaderObj *cubemapShader, ShaderObj *reflectionSh
 
         mainCubemap.render(cubemapShader);
         reflectiveRenderObjects.at(j)->unbindReflections(rozmiarOkna);
-        camera.flip(-distance);
+        camera.flip(-distance, reflectiveRenderObjects.at(j)->horizontal);
         camera.UpdateMatrix(shader);
         mainCubemap.updateMatrix(camera);
     }
@@ -237,13 +237,16 @@ int main()
 
     camera = Camera(rozmiarOkna, "cameraMatrix");
 
-    addRenderObject(new RenderObject("Obiekty/test.obj", glm::vec3(2.f, 0.f, 0.f)), "Tekstury/Skala.jpg");
+    addRenderObject(new RenderObject("Obiekty/test.obj", glm::vec3(0.f, 0.f, 0.f)), "Tekstury/Skala.jpg");
 
     addRenderObject(new RenderObject("Obiekty/Floor_square.obj", glm::vec3(0.f, 2.f, 0.f)), "Tekstury/Patrick.jpg");
 
-    addRenderObject(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -0.5f, 0.f), glm::vec3(0.f,0.f,0.f)), "Tekstury/Gradient.jpg", true);
+    addRenderObject(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -0.5f, 0.f), false, glm::vec3(0.f,0.f,0.f)), "Tekstury/Gradient.jpg", true);
 
-
+    //addRenderObject(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -5.f, 0.f), true, glm::vec3(90.f, 0.f, 0.f)), "Tekstury/Gradient.jpg", true);
+    //addRenderObject(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -5.f, 0.f), true, glm::vec3(270.f, 0.f, 0.f)), "Tekstury/Gradient.jpg", true);
+    addRenderObject(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -5.f, 0.f), true, glm::vec3(0.f, 0.f, 90.f)), "Tekstury/Gradient.jpg", true);
+    addRenderObject(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -5.f, 0.f), true, glm::vec3(0.f, 0.f, 270.f)), "Tekstury/Gradient.jpg", true);
 
     while (!glfwWindowShouldClose(okno)) {
         
