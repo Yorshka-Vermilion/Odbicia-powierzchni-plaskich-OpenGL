@@ -1,5 +1,5 @@
 ﻿#include <iostream>
-
+#include <vector>
 #include <GL/glew.h>
 #include <GL/GL.h>
 #include <GLFW/glfw3.h>
@@ -38,7 +38,9 @@ float currTime, lastTime, dt;
 Camera camera;
 bool cameraRotActive;
 
-Cubemap mainCubemap;
+Cubemap mainCubemap, tmpCubemap;
+int sizeOftmpCubemapRenders = 128;
+
 
 std::vector<RenderObject*> renderObjects;
 std::vector<RenderObject*> reflectiveRenderObjects;
@@ -156,51 +158,39 @@ void render(ShaderObj *shader, ShaderObj *cubemapShader, ShaderObj *reflectionSh
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     
+    std::vector<Cubemap*> cubemaps;
+    CubemapRenderCamera renderCamera(glm::vec3(0, 0, 0));
     // Render odbić
     for (size_t j = 0; j < reflectiveRenderObjects.size(); j++) {
-        //float distance = 2 * (camera.position.y - renderObjects.at(2)->position.y);
-        
-
-        //camera.flip(distance);
-        //camera.UpdateMatrix(shader);
-        //mainCubemap.updateMatrix(camera);
-        reflectiveRenderObjects.at(j)->bindReflections();
-        for (size_t i = 0; i < 0; i++)
-        {
-            if (!renderObjects.at(i)->reflective) {
-                /*
-                glm::mat4 oldMV = renderObjects.at(i)->mesh->ModelMatrix;
-                glm::mat4 MV = oldMV;
-                glm::vec3 V = glm::vec3(-MV[2][0], -MV[2][1], -MV[2][2]);
-                glm::vec3 R = glm::reflect(V, glm::vec3(0.f, 1.f, 0.f));
-                MV = glm::lookAt(renderObjects.at(i)->mesh->position, renderObjects.at(i)->mesh->position + R, glm::vec3(0.f, 1.f, 0.f));
-                MV = glm::scale(MV, glm::vec3(-1, 1, 1));
-                renderObjects.at(i)->mesh->ModelMatrix = MV;
-                renderObjects.at(i)->render(shader);
-                renderObjects.at(i)->mesh->ModelMatrix = oldMV;
-                */
-                renderObjects.at(i)->render(shader);
-            }
-        }
-
-        //mainCubemap.render(cubemapShader);
-        reflectiveRenderObjects.at(j)->unbindReflections(rozmiarOkna);
-        //camera.flip(-distance);
-        camera.UpdateMatrix(shader);
-        //mainCubemap.updateMatrix(camera);
+        cubemaps.push_back(new Cubemap(reflectiveRenderObjects.at(0)->position, 256, &renderCamera));
+        cubemaps.at(j)->refreshDynamicCubemap(&renderObjects, shader, &mainCubemap, cubemapShader, rozmiarOkna);
     }
     // Render głowny
+    mainCubemap.updateMatrix(camera);
     for (size_t i = 0; i < renderObjects.size(); i++)
     {
         if (!renderObjects.at(i)->reflective)
-            renderObjects.at(i)->render(shader);
-        else renderObjects.at(i)->render(reflectionShader,&camera,&mainCubemap);
+            renderObjects.at(i)->render(shader, &camera);
     }
+    for (size_t i = 0; i < reflectiveRenderObjects.size(); i++) {
+        //glActiveTexture(GL_TEXTURE0);
+        cubemaps.at(i)->updateMatrix(camera);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemaps.at(i)->texture);
+        reflectiveRenderObjects.at(i)->render(reflectionShader, &camera);
+        cubemaps.at(i)->remove();
+    }
+    
     mainCubemap.render(cubemapShader);
 
     // Koniec renderu
     glfwSwapBuffers(okno);
     glFlush();
+
+    for (size_t i = 0; i < cubemaps.size(); i++) {
+        delete(cubemaps.at(i));
+        cubemaps.pop_back();
+    }
+    cubemaps.clear();
 
     glBindVertexArray(0);
     glUseProgram(0);
@@ -251,15 +241,15 @@ int main()
 
     camera = Camera(rozmiarOkna, "cameraMatrix");
 
-    addRenderObject(new RenderObject("Obiekty/test.obj", glm::vec3(0.f, 0.f, 0.f)), "Tekstury/Skala.jpg",true);
+    addRenderObject(new RenderObject("Obiekty/test.obj", glm::vec3(0.f, 0.f, 0.f)), "Tekstury/Skala.jpg");
 
     addRenderObject(new RenderObject("Obiekty/Floor_square.obj", glm::vec3(0.f, 2.f, 0.f)), "Tekstury/Patrick.jpg");
 
-    addRenderObject(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -2.f, 0.f), glm::vec3(0.f,0.f,0.f)), "Tekstury/Gradient.jpg", true);
+    addRenderObject(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -1.f, 0.f), glm::vec3(0.f,0.f,0.f)), "Tekstury/Gradient.jpg",true);
 
-   // addRenderObject(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -5.f, 0.f), glm::vec3(90.f, 0.f, 0.f)), "Tekstury/Gradient.jpg", true);
-   // addRenderObject(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -5.f, 0.f), glm::vec3(-90.f, 0.f, 0.f)), "Tekstury/Gradient.jpg", true);
-   // addRenderObject(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -5.f, 0.f), glm::vec3(0.f, 0.f, 90.f)), "Tekstury/Gradient.jpg", true);
+    //addRenderObject(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -5.f, 0.f), glm::vec3(90.f, 0.f, 0.f)), "Tekstury/Gradient.jpg", true);
+   //addRenderObject(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -5.f, 0.f), glm::vec3(-90.f, 0.f, 0.f)), "Tekstury/Gradient.jpg", true);
+   //addRenderObject(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -5.f, 0.f), glm::vec3(0.f, 0.f, 90.f)), "Tekstury/Gradient.jpg", true);
     //addRenderObject(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -5.f, 0.f), glm::vec3(0.f, 0.f, -90.f)), "Tekstury/Gradient.jpg", true);
 
 

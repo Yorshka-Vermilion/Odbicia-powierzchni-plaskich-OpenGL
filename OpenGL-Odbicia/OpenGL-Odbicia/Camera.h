@@ -10,6 +10,7 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>
 #include "ShaderObj.h"
+#include "CubemapRenderCamera.h"
 
 
 enum direction { FORWARD = 0, RIGHT, BACK, LEFT, UP, DOWN };
