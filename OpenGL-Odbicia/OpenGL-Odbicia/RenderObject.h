@@ -9,10 +9,13 @@
 #include "ShaderObj.h"
 #include "Mesh.h"
 #include "Camera.h"
+#include "RenderObject.h"
+
 
 using namespace std;
 class RenderObject
 {
+public:
 	Mesh* mesh;
 	std::vector<Vertex> wooo;
 
@@ -58,6 +61,17 @@ public:
 			glDeleteTextures(1, &texture);
 		}
 	}
+	/*
+	glm::ma0t4 matrixReflect(glm::vec4 plane) {
+
+		return glm::mat4{
+			1 - 2 * plane.x * plane.x,  -2 * plane.x * plane.y,  -2 * plane.x * plane.z, -2 * plane.x * plane.w,
+			 -2 * plane.y * plane.x, 1 - 2 * plane.y * plane.y,  -2 * plane.y * plane.z, -2 * plane.y * plane.w,
+			 -2 * plane.z * plane.x,  -2 * plane.z * plane.y, 1 - 2 * plane.z * plane.z, -2 * plane.z * plane.w,
+							  0,                   0,                   0,                  1
+		};
+	}
+	*/
 
 	void bindReflections() {
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -104,10 +118,12 @@ public:
 		glActiveTexture(GL_TEXTURE0);
 		if (!reflective) {
 			glBindTexture(GL_TEXTURE_2D, texture);
+			shader->set3fv(camera->position, "cameraPosition");
+			shader->setMat4fv(camera->projection * camera->view, "cameraMatrix");
 		}
 		else {
-			glBindTexture(GL_TEXTURE_2D, reflectionTexture);
-			shader->set1i(0, "reflectionTexture");
+			shader->set1i(0, "cubemap");
+			shader->set3fv(camera->position, "cameraPosition");
 			shader->setMat4fv(camera->projection * camera->view, "cameraMatrix");
 		}
 		//shader->set1i(texture, "tex0");
@@ -116,6 +132,20 @@ public:
 		glBindTexture(GL_TEXTURE_2D, 0);
 		shader->Stop();
 	}
+
+	void renderInCubemap(ShaderObj* shader, CubemapRenderCamera* camera) {
+		shader->Use();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		shader->set1i(0, "cubemap");
+		shader->set3fv(camera->position, "cameraPosition");
+		shader->setMat4fv(camera->proj * camera->view, "cameraMatrix");
+		this->mesh->render(shader);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		shader->Stop();
+	}
+
+
 
 	void SetTexture(std::string filename) {
 		this->textureIMG = stbi_load(filename.c_str(), &width, &height, &colors, 0);

@@ -15,7 +15,7 @@
 
 class Mesh
 {
-private:
+public:
 	Vertex* vertexArray;
 	unsigned nrOfVertices;
 	GLuint* indexArray;
