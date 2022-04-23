@@ -8,6 +8,7 @@ out vec2 texCoord;
 uniform mat4 cameraMatrix;
 uniform mat4 ModelMatrix;
 
+uniform vec3 cameraPosition;
 void main(){
   texCoord = vec2(aTex.x, aTex.y*-1.f);
   gl_Position =  cameraMatrix*ModelMatrix*vec4(aPos, 1.0);
