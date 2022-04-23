@@ -21,7 +21,6 @@ public:
 	glm::vec3 position;
 	glm::vec3 orientation = glm::vec3(0.0f, 0.0f, -1.0f);
 	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-	glm::vec3 right = glm::vec3(1.0f, 0.0f, 0.0f);
 
 	glm::vec2 windowSize;
 	glm::mat4 view;
@@ -54,19 +53,11 @@ public:
 		shader->Stop();
 	}
 
-	void flip(glm::vec3 distance, bool horizontal) {
+	void flip(glm::vec3 distance) {
+		this->position.y -= distance.y;
+		orientation = glm::rotate(orientation, (float)glm::radians(180.f), up);
+		orientation = glm::rotate(orientation, (float)glm::radians(180.f), glm::normalize(glm::cross(orientation, up)));
 		
-		if (!horizontal) {
-			this->position.y -= distance.y;
-			orientation = glm::rotate(orientation, (float)glm::radians(180.f), glm::normalize(glm::cross(orientation, up)));
-			orientation = glm::rotate(orientation, (float)glm::radians(180.f), up);
-		}
-		else if (horizontal) {
-			this->position.z -= distance.z;
-			orientation = glm::rotate(orientation, (float)glm::radians(180.f), glm::normalize(glm::cross(orientation, right)));
-			orientation = glm::rotate(orientation, (float)glm::radians(180.f), right);
-		}
-
 	}
 
 	void Move(const int direction, const float& dt) {

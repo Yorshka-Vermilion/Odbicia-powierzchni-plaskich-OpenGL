@@ -13,9 +13,6 @@
 using namespace std;
 class RenderObject
 {
-	Mesh* mesh;
-	std::vector<Vertex> wooo;
-
 	// Textura
 	GLuint texture;
 	bool hasTexture = false;
@@ -31,6 +28,7 @@ class RenderObject
 	int heightFB = 1024;
 
 public:
+	Mesh* mesh;
 	glm::vec3 position, rotation;
 	bool reflective = false;
 	bool horizontal = false;
@@ -39,18 +37,14 @@ public:
 
 	};
 
-	RenderObject(std::string filename, glm::vec3 position, bool horizontal = false, glm::vec3 rotation = glm::vec3(0.f)) {
+	RenderObject(std::string filename, glm::vec3 position, glm::vec3 rotation = glm::vec3(0.f), glm::vec3 scale = glm::vec3(1.f)) {
 		//load_obj(filename.c_str());
 		//bool loadout = loader.LoadFile(filename);
 		this->horizontal = horizontal;
 		this->position = position;
 		this->rotation = rotation;
 		std::vector<Vertex> mesh = loadOBJ(filename.c_str());
-		this->mesh = new Mesh(mesh.data(), mesh.size(), NULL, 0, position,
-			glm::vec3(0.f),
-			rotation,
-			glm::vec3(1.f));
-
+		this->mesh = new Mesh(mesh.data(), mesh.size(), NULL, 0, position,glm::vec3(0.f),rotation,scale);
 	}
 
 	~RenderObject() {

@@ -43,7 +43,7 @@ Cubemap mainCubemap;
 std::vector<RenderObject*> renderObjects;
 std::vector<RenderObject*> reflectiveRenderObjects;
 
-// :: Obsluga klawiszy ::
+// :: Obsluga sterowania ::
 
 void rotateCamera() {
     glm::dvec2 mousePos;
@@ -144,11 +144,6 @@ void exit() {
 
 // :: RENDER ::
 
-float tmp[] = {
-        -1.0f, -1.0f, 0.0f,
-         1.0f, -1.0f, 0.0f,
-        0.0f,  1.0f, 0.0f,
-};
 
 
 
@@ -159,7 +154,7 @@ void render(ShaderObj *shader, ShaderObj *cubemapShader, ShaderObj *reflectionSh
     // Render odbić
     for (size_t j = 0; j < reflectiveRenderObjects.size(); j++) {
         glm::vec3 distance = (camera.position - reflectiveRenderObjects.at(j)->position) * 2.f;
-        camera.flip(distance, reflectiveRenderObjects.at(j)->horizontal);
+        camera.flip(distance);
         camera.UpdateMatrix(shader);
         mainCubemap.updateMatrix(camera);
         reflectiveRenderObjects.at(j)->bindReflections();
@@ -171,7 +166,7 @@ void render(ShaderObj *shader, ShaderObj *cubemapShader, ShaderObj *reflectionSh
 
         mainCubemap.render(cubemapShader);
         reflectiveRenderObjects.at(j)->unbindReflections(rozmiarOkna);
-        camera.flip(-distance, reflectiveRenderObjects.at(j)->horizontal);
+        camera.flip(-distance);
         camera.UpdateMatrix(shader);
         mainCubemap.updateMatrix(camera);
     }
@@ -183,7 +178,9 @@ void render(ShaderObj *shader, ShaderObj *cubemapShader, ShaderObj *reflectionSh
         else renderObjects.at(i)->render(reflectionShader,&camera);
     }
     mainCubemap.render(cubemapShader);
-
+    
+    //std::cout << camera.orientation.x << " : " << camera.orientation.y << " : " << camera.orientation.z << endl;
+        
     // Koniec renderu
     glfwSwapBuffers(okno);
     glFlush();
@@ -201,11 +198,15 @@ void update(ShaderObj* shader) {
     currTime = static_cast<float>(glfwGetTime());
     dt = currTime - lastTime;
     lastTime = currTime;
+    float fps = 1 / dt;
+    std::cout << fps << std::endl;
+
+    renderObjects.at(0)->mesh->rotate(glm::vec3(0.f, 90.f * dt, 0.f));
     
-    camera.UpdateMatrix(shader);
     if (cameraRotActive) {
         rotateCamera();
     }
+    camera.UpdateMatrix(shader);
 
     mainCubemap.updateMatrix(camera);
 
@@ -231,30 +232,48 @@ int main()
     ShaderObj shader = ShaderObj("shader1.vert", "shader1.frag");
     ShaderObj cubemapShader = ShaderObj("cubemaps.vert", "cubemaps.frag");
     ShaderObj reflectionShader = ShaderObj("odbicie.vert", "odbicie.frag");
-    //shader.Use();
 
     mainCubemap = Cubemap(&cubemapShader);
 
     camera = Camera(rozmiarOkna, "cameraMatrix");
 
-    addRenderObject(new RenderObject("Obiekty/test.obj", glm::vec3(0.f, 0.f, 0.f)), "Tekstury/Skala.jpg");
+    //::Obiekty::
 
-    addRenderObject(new RenderObject("Obiekty/Floor_square.obj", glm::vec3(0.f, 2.f, 0.f)), "Tekstury/Patrick.jpg");
+    addRenderObject(new RenderObject("Obiekty/test.obj", glm::vec3(0.f, 1.05f, 0.f), glm::vec3(0.f), glm::vec3(0.5f, 0.5f, 0.5f)), "Tekstury/Skala.jpg");
 
-    addRenderObject(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -0.5f, 0.f), false, glm::vec3(0.f,0.f,0.f)), "Tekstury/Gradient.jpg", true);
+    addRenderObject(new RenderObject("Obiekty/Table.obj", glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(0.01f, 0.01f, 0.01f)), "Tekstury/table.tga");
 
-    //addRenderObject(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -5.f, 0.f), true, glm::vec3(90.f, 0.f, 0.f)), "Tekstury/Gradient.jpg", true);
-    //addRenderObject(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -5.f, 0.f), true, glm::vec3(270.f, 0.f, 0.f)), "Tekstury/Gradient.jpg", true);
-    addRenderObject(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -5.f, 0.f), true, glm::vec3(0.f, 0.f, 90.f)), "Tekstury/Gradient.jpg", true);
-    addRenderObject(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, -5.f, 0.f), true, glm::vec3(0.f, 0.f, 270.f)), "Tekstury/Gradient.jpg", true);
+    addRenderObject(new RenderObject("Obiekty/Doniczka.obj", glm::vec3(1.f, 2.25f, 0.f), glm::vec3(0.f), glm::vec3(1.f, 1.f, 1.f)), "Tekstury/Doniczka.jpg");
+
+
+    addRenderObject(new RenderObject("Obiekty/Krzeslo.obj", glm::vec3(1.5f, 1.25f, 0.45f), glm::vec3(0.f,90.f,0.f), glm::vec3(0.5f, 0.5f, 0.5f)), "Tekstury/Krzeslo.jpg");
+    addRenderObject(new RenderObject("Obiekty/Krzeslo.obj", glm::vec3(1.5f, 1.25f, -0.45f), glm::vec3(0.f, 90.f, 0.f), glm::vec3(0.5f, 0.5f, 0.5f)), "Tekstury/Krzeslo.jpg");
+    addRenderObject(new RenderObject("Obiekty/Krzeslo.obj", glm::vec3(1.5f, 1.25f, 0.45f), glm::vec3(0.f, -90.f, 0.f), glm::vec3(0.5f, 0.5f, 0.5f)), "Tekstury/Krzeslo.jpg");
+    addRenderObject(new RenderObject("Obiekty/Krzeslo.obj", glm::vec3(1.5f, 1.25f, -0.45f), glm::vec3(0.f, -90.f, 0.f), glm::vec3(0.5f, 0.5f, 0.5f)), "Tekstury/Krzeslo.jpg");
+
+    addRenderObject(new RenderObject("Obiekty/Sciana.obj", glm::vec3(3.43f, 1.32f, -1.695f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.5f, 0.5f, 0.5f)), "Tekstury/Sciana.jpg");
+    addRenderObject(new RenderObject("Obiekty/Sciana.obj", glm::vec3(3.43f, 1.32f, 1.695f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.5f, 0.5f, 0.5f)), "Tekstury/Sciana.jpg");
+    addRenderObject(new RenderObject("Obiekty/Sciana.obj", glm::vec3(3.43f, 1.32f, -1.695f), glm::vec3(0.f, 90.f, 0.f), glm::vec3(0.5f, 0.5f, 0.5f)), "Tekstury/Sciana.jpg");
+    addRenderObject(new RenderObject("Obiekty/Sciana.obj", glm::vec3(3.43f, 1.32f, 1.695f), glm::vec3(0.f, 90.f, 0.f), glm::vec3(0.5f, 0.5f, 0.5f)), "Tekstury/Sciana.jpg");
+
+    addRenderObject(new RenderObject("Obiekty/kanapa.obj", glm::vec3(5.5f, 1.75f, 0.0f), glm::vec3(0.f, 45.f, 0.f), glm::vec3(0.5f, 0.5f, 0.5f)), "Tekstury/Kanapa.jpg");
+
+    addRenderObject(new RenderObject("Obiekty/Polka.obj", glm::vec3(3.43f, 1.2f, 1.695f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.5f, 0.5f, 0.5f)), "Tekstury/Polka.jpg");
+    addRenderObject(new RenderObject("Obiekty/Polka.obj", glm::vec3(3.43f, 1.0f, -1.5f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.5f, 0.5f, 0.5f)), "Tekstury/Polka.jpg");
+    addRenderObject(new RenderObject("Obiekty/Polka.obj", glm::vec3(3.43f, 0.9f, 1.2f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.5f, 0.5f, 0.5f)), "Tekstury/Polka.jpg");
+    addRenderObject(new RenderObject("Obiekty/Polka.obj", glm::vec3(3.43f, 1.32f, 1.695f), glm::vec3(0.f, 90.f, 0.f), glm::vec3(0.5f, 0.5f, 0.5f)), "Tekstury/Polka.jpg");
+    addRenderObject(new RenderObject("Obiekty/Polka.obj", glm::vec3(3.43f, 1.0f, -1.3f), glm::vec3(0.f, 90.f, 0.f), glm::vec3(0.5f, 0.5f, 0.5f)), "Tekstury/Polka.jpg");
+    addRenderObject(new RenderObject("Obiekty/Polka.obj", glm::vec3(3.43f, 0.8f, 1.4f), glm::vec3(0.f, 90.f, 0.f), glm::vec3(0.5f, 0.5f, 0.5f)), "Tekstury/Polka.jpg");
+
+
+
+    addRenderObject(new RenderObject("Obiekty/Plane.obj", glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f,0.f,0.f), glm::vec3(1.5f, 1.5f, 1.5f)), "Tekstury/Gradient.jpg", true);
+
+    //::KONIEC OBIEKTOW::
 
     while (!glfwWindowShouldClose(okno)) {
-        
         update(&shader);
-        
-        
         render(&shader,&cubemapShader,&reflectionShader);
-        
     }
 
     exit();
