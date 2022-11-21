@@ -27,7 +27,7 @@ która zostaje wyświetlona na ekranie.
 Program możemy uruchomić na dwa sposoby. Pierwszym z nich jest wejście do folderu
 x64/Release i uruchomienie pliku OpenGL-Odbicia.exe. Drugim sposobem jest uruchomienie
 pliku OpenGL-Odbicia.sln w programie VisualStudio, a następnie skompilowaniu projektu. Do
-uruchomienia programu w edytorze IDE, trzeba będzie zlinkować biblioteki
+uruchomienia programu w edytorze IDE, trzeba będzie zlinkować biblioteki.
 
 ### Sterowanie: 
 
